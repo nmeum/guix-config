@@ -4,8 +4,8 @@
              (gnu services desktop)
              (gnu services dns)
              (gnu services networking)
-             (gnu services sound)
              (gnu services ssh)
+             (gnu services sysctl)
              (gnu system locale)
              (gnu system pam)
 
@@ -13,7 +13,6 @@
 
              (nmeum packages misc)
              (nmeum packages desktop)
-             (nmeum packages networking)
              (nmeum services networking)
              (nmeum services system)
              ((nongnu packages linux) #:select (linux linux-firmware)))
@@ -63,7 +62,7 @@
                   ;; Note: Without elogind, it is neccessary to also be in both
                   ;; the audio and the video group as seatd doesn't mediated access
                   ;; to audio/video devices.
-                  (supplementary-groups '("wheel" "netdev" "seat" "audio")))
+                  (supplementary-groups '("wheel" "netdev")))
                 %base-user-accounts))
 
   ;; Allow sudo use without password authentication.
@@ -75,64 +74,62 @@
   ;; Below is the list of system services.  To search for available
   ;; services, run 'guix system search KEYWORD' in a terminal.
   (services
-   (append (list
-                 (service seatd-service-type)
-                 (service dbus-root-service-type)
+    (append (list
+              (service elogind-service-type)
+              (service dbus-root-service-type)
 
-                 (service unbound-service-type
-                          (unbound-configuration
-                            (forward-zone
-                              (list
-                                (unbound-zone
-                                  (name ".")
-                                  (forward-addr '("149.112.112.112#dns.quad9.net"
-                                                  "2620:fe::9#dns.quad9.net"))
-                                  (forward-tls-upstream #t))))))
+              (service unbound-service-type
+                       (unbound-configuration
+                         (forward-zone
+                           (list
+                             (unbound-zone
+                               (name ".")
+                               (forward-addr '("149.112.112.112#dns.quad9.net"
+                                               "2620:fe::9#dns.quad9.net"))
+                               (forward-tls-upstream #t))))))
 
-                 (service openssh-service-type
-                          (openssh-configuration
-                            (allow-agent-forwarding? #f)
-                            (password-authentication? #f)))
+              (service openssh-service-type
+                       (openssh-configuration
+                         (allow-agent-forwarding? #f)
+                         (password-authentication? #f)))
 
-                 (service openntpd-service-type
-                          (openntpd-configuration
-                            (servers '("europe.pool.ntp.org"))
-                            (constraint-from
-                              '(;; Quad9 DNS (IPv4)
-                                "9.9.9.9"
-                                ;; Quad9 DNS (IPv6)
-                                "2620:fe::fe"
-                                ;; Google LLC (DNS)
-                                "www.google.com"))))
+              (service openntpd-service-type
+                       (openntpd-configuration
+                         (servers '("europe.pool.ntp.org"))
+                         (constraint-from
+                           '(;; Quad9 DNS (IPv4)
+                             "9.9.9.9"
+                             ;; Quad9 DNS (IPv6)
+                             "2620:fe::fe"
+                             ;; Google LLC (DNS)
+                             "www.google.com"))))
 
-                 (service dhcpcd-service-type
-                          (dhcpcd-configuration
-                            (options
-                              '((hostname)
-                                (duid)
-                                (persistent)
-                                (vendorclassid)
-                                (slaac private)
-                                (require dhcp_server_identifier)
+              (service dhcpcd-service-type
+                       (dhcpcd-configuration
+                         (vendorclassid "MSFT")
+                         (option '("rapid_commit" "interface_mtu"))
+                         (nooption '("nd_rdnss"
+                                     "dhcp6_name_servers"
+                                     "domain_name_servers"
+                                     "domain_name"
+                                     "domain_search"))
+                         (static '("domain_name_servers=127.0.0.1"))
+                         (nohook '("hostname")))))
 
-                                (option rapid_commit interface_mtu)
-                                (nooption nd_rdnss)
-                                (nooption dhcp6_name_servers)
-                                (nooption domain_name_servers domain_name domain_search)
+            (modify-services %base-services
+                             ;; Enable substitutes for nonguix.
+                             (guix-service-type config => (nonguix-config config))
 
-                                (static "domain_name_servers=127.0.0.1")
-                                (nohook hostname))))))
-
-           (cons*
-              (service login-xdg-runtime-service-type)
-              (modify-services %base-services
-                (delete login-service-type)
-                (guix-service-type config => (nonguix-config config))))))
+                             ;; Enable additional sysctls.
+                             (sysctl-service-type config =>
+                               (sysctl-configuration
+                                 (inherit config)
+                                 (settings
+                                   (append %default-sysctl-settings
+                                           '(("kernel.dmesg_restrict" . "1")
+                                             ("kernel.kptr_restrict" . "1")))))))))
 
   (bootloader (bootloader-configuration
-                ;;(bootloader grub-bootloader)
-                ;;(targets (list "/dev/nvme1n1"))
-
                 ;; Use a removable bootloader configuration here to prevent
                 ;; Grub from updating UEFI boot entries, thereby making Guix
                 ;; (instead of Alpine) the default entry.
@@ -155,12 +152,6 @@
   (file-systems (cons* (file-system
                          (check? #f)
                          (mount-point "/tmp")
-                         (device "none")
-                         (type "tmpfs"))
-                       ;; Required for login-xdg-runtime-service-type.
-                       (file-system
-                         (check? #f)
-                         (mount-point "/run/user")
                          (device "none")
                          (type "tmpfs"))
 
