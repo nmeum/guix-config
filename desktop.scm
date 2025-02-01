@@ -1,13 +1,17 @@
 (use-modules (gnu)
              (gnu packages shells)
-             (gnu packages dns)
+             (gnu services dbus)
              (gnu services desktop)
+             (gnu services dns)
              (gnu services networking)
              (gnu services sound)
              (gnu services ssh)
              (gnu system locale)
              (gnu system pam)
 
+             (gnu services dns)
+
+             (nmeum packages misc)
              (nmeum packages desktop)
              (nmeum packages networking)
              (nmeum services networking)
@@ -36,8 +40,6 @@
       (append (list (plain-file "non-guix.pub" nonguix-signkey))
               %default-authorized-guix-keys))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (operating-system
   (kernel linux)
   (firmware (list linux-firmware))
@@ -56,9 +58,12 @@
                   (name "soeren")
                   (comment "Sören Tempel")
                   (group "users")
-                  (shell (file-append loksh "/bin/ksh"))
+                  (shell (file-append loksh-bracketed "/bin/ksh"))
                   (home-directory "/home/soeren")
-                  (supplementary-groups '("wheel" "netdev" "audio" "video" "seat")))
+                  ;; Note: Without elogind, it is neccessary to also be in both
+                  ;; the audio and the video group as seatd doesn't mediated access
+                  ;; to audio/video devices.
+                  (supplementary-groups '("wheel" "netdev" "seat" "audio")))
                 %base-user-accounts))
 
   ;; Allow sudo use without password authentication.
@@ -67,100 +72,79 @@
   (sudoers-file
     (plain-file "sudoers" "root ALL=(ALL) ALL\n%wheel ALL=(ALL) NOPASSWD: ALL\n"))
 
-  ;; Packages installed system-wide.  Users can also install packages
-  ;; under their own account: use 'guix search KEYWORD' to search
-  ;; for packages and 'guix install PACKAGE' to install a package.
-  (packages (append (map specification->package
-                         '("nss-certs"
-                           "openntpd"
-                           "dumb-runtime-dir"
-                           "unbound"
-                           "seatd"
-                           "vim"
-                           "git"
-                           "loksh"))
-                    %base-packages))
-
   ;; Below is the list of system services.  To search for available
   ;; services, run 'guix system search KEYWORD' in a terminal.
   (services
    (append (list
-             (service unbound-service-type
-                      (unbound-configuration
-                        (forward-zone
-                          '((name . ".")
-                            (forward-addr . "149.112.112.112#dns.quad9.net")
-                            (forward-addr . "2620:fe::9#dns.quad9.net")
-                            (forward-tls-upstream . yes)))))
+                 (service seatd-service-type)
+                 (service dbus-root-service-type)
 
-             (service seatd-service-type)
-             ; (service elogind-service-type
-             ;          (elogind-configuration
-             ;            (kill-user-processes? #f)))
+                 (service unbound-service-type
+                          (unbound-configuration
+                            (forward-zone
+                              (list
+                                (unbound-zone
+                                  (name ".")
+                                  (forward-addr '("149.112.112.112#dns.quad9.net"
+                                                  "2620:fe::9#dns.quad9.net"))
+                                  (forward-tls-upstream #t))))))
 
-             (service alsa-service-type
-                      (alsa-configuration
-                        (pulseaudio? #f)
-                        ;; TODO: Add a declarative unbound-like configuration.
-                        ;;
-                        ;; XXX: Might also just need to blacklist some
-                        ;; module. Have to look at my Alpine config.
-                        (extra-options "defaults.pcm.card 1\ndefaults.ctl.card 1\n")))
+                 (service openssh-service-type
+                          (openssh-configuration
+                            (allow-agent-forwarding? #f)
+                            (password-authentication? #f)))
 
-             (service openntpd-service-type
-                      (openntpd-configuration
-                        (servers '("europe.pool.ntp.org"))
-                        (constraint-from
-                          '(;; Quad9 DNS (IPv4)
-                            "9.9.9.9"
-                            ;; Quad9 DNS (IPv6)
-                            "2620:fe::fe"
-                            ;; Google LLC (DNS)
-                            "www.google.com"))))
+                 (service openntpd-service-type
+                          (openntpd-configuration
+                            (servers '("europe.pool.ntp.org"))
+                            (constraint-from
+                              '(;; Quad9 DNS (IPv4)
+                                "9.9.9.9"
+                                ;; Quad9 DNS (IPv6)
+                                "2620:fe::fe"
+                                ;; Google LLC (DNS)
+                                "www.google.com"))))
 
-             (service openssh-service-type
-                      (openssh-configuration
-                        (allow-agent-forwarding? #f)
-                        (password-authentication? #f)))
+                 (service dhcpcd-service-type
+                          (dhcpcd-configuration
+                            (options
+                              '((hostname)
+                                (duid)
+                                (persistent)
+                                (vendorclassid)
+                                (slaac private)
+                                (require dhcp_server_identifier)
 
-             (service sane-service-type)
+                                (option rapid_commit interface_mtu)
+                                (nooption nd_rdnss)
+                                (nooption dhcp6_name_servers)
+                                (nooption domain_name_servers domain_name domain_search)
 
-             ; (service dhcp-client-service-type
-             ;          (dhcp-client-configuration
-             ;            (package dhcpcd))))
-
-             (service dhcpcd-service-type
-                      (dhcpcd-configuration
-                        (options
-                          '((hostname)
-                            (duid)
-                            (persistent)
-                            (vendorclassid)
-                            (slaac private)
-                            (require dhcp_server_identifier)
-
-                            (option rapid_commit interface_mtu)
-                            (nooption nd_rdnss)
-                            (nooption dhcp6_name_servers)
-                            (nooption domain_name_servers domain_name domain_search)
-
-                            (static "domain_name_servers=127.0.0.1")
-                            (nohook hostname))))))
+                                (static "domain_name_servers=127.0.0.1")
+                                (nohook hostname))))))
 
            (cons*
-             (service login-xdg-runtime-service-type)
-             (modify-services %base-services
-               (delete login-service-type)
-               (guix-service-type config  => (nonguix-config config))))))
+              (service login-xdg-runtime-service-type)
+              (modify-services %base-services
+                (delete login-service-type)
+                (guix-service-type config => (nonguix-config config))))))
 
   (bootloader (bootloader-configuration
-                (bootloader grub-efi-bootloader)
+                ;;(bootloader grub-bootloader)
+                ;;(targets (list "/dev/nvme1n1"))
+
+                ;; Use a removable bootloader configuration here to prevent
+                ;; Grub from updating UEFI boot entries, thereby making Guix
+                ;; (instead of Alpine) the default entry.
+                ;;
+                ;; See the --removable and --no-nvram option of grub-install.
+                (bootloader grub-efi-removable-bootloader)
                 (targets (list "/boot/efi"))
-                (extra-initrd "/key-file.cpio")
-                (keyboard-layout keyboard-layout)))
+                (keyboard-layout keyboard-layout)
+                (extra-initrd "/key-file.cpio")))
 
   (mapped-devices (list (mapped-device
-                          (source (uuid "1a4403d8-9b5e-4714-a8ce-9e4920035b72"))
+                          (source (uuid "d9bd4aa0-bd68-4fef-b6a5-0657bd69daef"))
                           (target "cryptroot")
                           (type (luks-device-mapping-with-options
                                   #:key-file "/key-file.bin")))))
@@ -173,6 +157,7 @@
                          (mount-point "/tmp")
                          (device "none")
                          (type "tmpfs"))
+                       ;; Required for login-xdg-runtime-service-type.
                        (file-system
                          (check? #f)
                          (mount-point "/run/user")
@@ -186,5 +171,5 @@
                          (dependencies mapped-devices))
                        (file-system
                          (mount-point "/boot/efi")
-                         (device (uuid "781B-DB19" 'fat32))
+                         (device (uuid "04FA-08B2" 'fat32))
                          (type "vfat")) %base-file-systems)))
