@@ -143,24 +143,49 @@
   (mapped-devices (list (mapped-device
                           (source (uuid "d9bd4aa0-bd68-4fef-b6a5-0657bd69daef"))
                           (target "cryptroot")
+                          ;; TODO: Need to enable cryptdiscards here for SSDs.
+                          ;;
+                          ;; See https://issues.guix.gnu.org/73654
                           (type (luks-device-mapping-with-options
                                   #:key-file "/key-file.bin")))))
 
   ;; The list of file systems that get "mounted".  The unique
   ;; file system identifiers there ("UUIDs") can be obtained
   ;; by running 'blkid' in a terminal.
-  (file-systems (cons* (file-system
-                         (check? #f)
-                         (mount-point "/tmp")
-                         (device "none")
-                         (type "tmpfs"))
+  (file-systems
+    (let ((btrfs-subvol (lambda (mnt flags opts)
+                          (file-system
+                            (mount-point mnt)
+                            (device "/dev/mapper/cryptroot")
+                            (type "btrfs")
+                            (flags flags)
+                            (options (alist->file-system-options
+                                       (cons (cons "subvol" mnt) opts)))
+                            (dependencies mapped-devices)))))
+      (cons* (file-system
+               (check? #f)
+               (mount-point "/tmp")
+               (device "none")
+               (type "tmpfs"))
 
-                       (file-system
-                         (mount-point "/")
-                         (device "/dev/mapper/cryptroot")
-                         (type "btrfs")
-                         (dependencies mapped-devices))
-                       (file-system
-                         (mount-point "/boot/efi")
-                         (device (uuid "04FA-08B2" 'fat32))
-                         (type "vfat")) %base-file-systems)))
+             ;; TODO: Subvolumes for /home, /var, /var/log, /var/tmp, …
+             ;;
+             ;; Note: Btrfs does presently not support filesystem-specific
+             ;; mount options on subvolume-granularity, generic ones work.
+             ;;
+             ;; See https://btrfs.readthedocs.io/en/stable/btrfs-subvolume.html#mount-options
+             (btrfs-subvol "/"
+                           '(no-atime)
+                           '("rw"
+                             "ssd"
+                             ("compress" . "lzo")
+                             ("space_cache" . "v2")))
+             ;; TODO: Consider using a tmpfs for /var/tmp
+             (btrfs-subvol "/var/tmp"
+                           '(no-atime no-suid no-dev no-exec)
+                           '())
+
+             (file-system
+               (mount-point "/boot/efi")
+               (device (uuid "04FA-08B2" 'fat32))
+               (type "vfat")) %base-file-systems))))
