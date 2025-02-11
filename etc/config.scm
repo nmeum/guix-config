@@ -4,6 +4,7 @@
              (gnu services desktop)
              (gnu services dns)
              (gnu services networking)
+             (gnu services mcron)
              (gnu services ssh)
              (gnu services sysctl)
              (gnu system locale)
@@ -77,6 +78,18 @@
     (append (list
               (service elogind-service-type)
               (service dbus-root-service-type)
+
+              ;; TODO: btrfs snapshots (see comment regarding subvolumes below).
+              ;;
+              ;; XXX: mcron has not been designed to run anachronistically.
+              ;; See: https://www.gnu.org/software/mcron/manual/mcron.html#Behaviour-on-laptops
+              (let ((guix-gc #~(job '(next-hour '(12)) "guix gc -F 100G")))
+                (simple-service 'guix-gc-cron
+                                mcron-service-type
+                                (list guix-gc)))
+
+              ;; TODO: Needs cryptdiscards enabled on the LUKS volume (see below).
+              ;(service fstrim-service-type)
 
               (service unbound-service-type
                        (unbound-configuration
