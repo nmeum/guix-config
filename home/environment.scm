@@ -49,6 +49,7 @@
   '("ncmpc"
     "mpv"
     "pipewire"
+    "wireplumber"
     "yt-dlp"))
 
 (define packages-programming
