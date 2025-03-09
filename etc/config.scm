@@ -14,8 +14,6 @@
 
              (nmeum packages misc)
              (nmeum packages desktop)
-             (nmeum services networking)
-             (nmeum services system)
              ((nongnu packages linux) #:select (linux linux-firmware)))
 
 ;; The signing key for the nonguix substitutes embedded as plain text.
@@ -119,15 +117,15 @@
 
               (service dhcpcd-service-type
                        (dhcpcd-configuration
-                         (vendorclassid "MSFT")
+                         (vendor-class-id "MSFT")
                          (option '("rapid_commit" "interface_mtu"))
-                         (nooption '("nd_rdnss"
-                                     "dhcp6_name_servers"
-                                     "domain_name_servers"
-                                     "domain_name"
-                                     "domain_search"))
+                         (no-option '("nd_rdnss"
+                                      "dhcp6_name_servers"
+                                      "domain_name_servers"
+                                      "domain_name"
+                                      "domain_search"))
                          (static '("domain_name_servers=127.0.0.1"))
-                         (nohook '("hostname")))))
+                         (no-hook '("hostname")))))
 
             (modify-services %base-services
                              ;; Enable substitutes for nonguix.
