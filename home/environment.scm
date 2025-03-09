@@ -28,7 +28,7 @@
     "wlsunset"))
 
 (define packages-documents
-  '("mandoc-zstd"))
+  '("mandoc"))
 
 (define packages-font
   '("fontconfig"
