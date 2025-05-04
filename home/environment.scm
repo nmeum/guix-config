@@ -64,6 +64,7 @@
 
 (define packages-tools
   '("chimerautils"
+    "cryptsetup"
     "file"
     "fzf"
     "htop"
