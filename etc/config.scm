@@ -32,6 +32,10 @@
 (define (nonguix-config config)
   (guix-configuration
     (inherit config)
+    ;; Run guix-daemon in non-privileged mode. This may become the default in the future.
+    ;;
+    ;; See https://codeberg.org/guix/guix-mirror/commit/ba53ff9cc403c7f0388e2dc932cb46e665e81be7
+    (privileged? #f)
     (substitute-urls
       (append (list "https://substitutes.nonguix.org")
               %default-substitute-urls))
