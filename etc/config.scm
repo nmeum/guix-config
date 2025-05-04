@@ -3,6 +3,7 @@
              (gnu services dbus)
              (gnu services desktop)
              (gnu services dns)
+             (gnu services linux)
              (gnu services networking)
              (gnu services mcron)
              (gnu services ssh)
@@ -76,6 +77,7 @@
     (append (list
               (service elogind-service-type)
               (service dbus-root-service-type)
+              (service fstrim-service-type)
 
               ;; TODO: btrfs snapshots (see comment regarding subvolumes below).
               ;;
@@ -85,9 +87,6 @@
                 (simple-service 'guix-gc-cron
                                 mcron-service-type
                                 (list guix-gc)))
-
-              ;; TODO: Needs cryptdiscards enabled on the LUKS volume (see below).
-              ;(service fstrim-service-type)
 
               (service unbound-service-type
                        (unbound-configuration
@@ -163,10 +162,8 @@
   (mapped-devices (list (mapped-device
                           (source (uuid "d9bd4aa0-bd68-4fef-b6a5-0657bd69daef"))
                           (target "cryptroot")
-                          ;; TODO: Need to enable cryptdiscards here for SSDs.
-                          ;;
-                          ;; See https://issues.guix.gnu.org/73654
                           (type (luks-device-mapping-with-options
+                                  #:allow-discards? #t
                                   #:key-file "/key-file.bin")))))
 
   ;; The list of file systems that get "mounted".  The unique
