@@ -4,16 +4,21 @@
 ;; without Guix Home.
 
 (define-module (guix-home-config)
-  #:use-module (guix records)
+  #:use-module (guix gexp)
   #:use-module (gnu home)
   #:use-module (gnu home services)
   #:use-module (gnu home services desktop)
   #:use-module (gnu home services shells)
+  #:use-module (gnu home services shepherd)
   #:use-module (gnu home services sound)
   #:use-module (gnu packages)
+  #:use-module (gnu packages bash)
   #:use-module (gnu packages linux)
+  #:use-module (gnu packages xdisorg)
   #:use-module (gnu services)
-  #:use-module (gnu system shadow))
+  #:use-module (gnu system shadow)
+  #:use-module (nmeum packages desktop)
+  #:use-module (nmeum packages misc))
 
 (define packages-desktop
   '("adwaita-icon-theme"
@@ -109,6 +114,44 @@
       (services
         (append
           (list
+            ;; Needed to start services which use WAYLAND_DISPLAY.
+            ;; See: https://issues.guix.gnu.org/76619
+            (service home-shepherd-service-type
+                     (home-shepherd-configuration
+                       (auto-start? #f)))
+
+            (simple-service 'wlsunset
+              home-shepherd-service-type
+              (list (shepherd-service
+                      (provision '(wlsunset))
+                      (start
+                        #~(make-forkexec-constructor
+                            (list
+                              (string-append #$wlsunset "/bin/wlsunset")
+                              "-l" "52.3" "-L" "11.1")))
+                      (stop #~(make-kill-destructor)))))
+
+            (simple-service 'dam
+              home-shepherd-service-type
+              (list (shepherd-service
+                      (provision '(dam))
+                      (start
+                        ;; TODO: Supervise status text and status bar service separately.
+                        #~(make-forkexec-constructor
+                            (list (string-append #$bash-minimal "/bin/sh") "-c"
+                                  (format #f
+                                    "(while ~a 5; do ~a; done) | ~a ~a"
+                                    (string-append #$chimera-utils "/bin/sleep")
+                                    (string-append #$chimera-utils "/bin/date")
+                                    (string-append #$dam "/bin/dam")
+                                    (string-join
+                                      '("-f Terminus:size=12"
+                                        "-nb '#282828'"
+                                        "-nf '#b8b8b8'"
+                                        "-sb '#7cafc2'"
+                                        "-sf '#181818'") " ")))))
+                      (stop #~(make-kill-destructor)))))
+
             (service home-dbus-service-type)
             (service home-pipewire-service-type
                      (home-pipewire-configuration
