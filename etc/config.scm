@@ -167,9 +167,10 @@
   (mapped-devices (list (mapped-device
                           (source (uuid "d9bd4aa0-bd68-4fef-b6a5-0657bd69daef"))
                           (target "cryptroot")
-                          (type (luks-device-mapping-with-options
-                                  #:allow-discards? #t
-                                  #:key-file "/key-file.bin")))))
+                          (type luks-device-mapping)
+                          (arguments
+                            '(#:allow-discards? #t
+                              #:key-file "/key-file.bin")))))
 
   ;; The list of file systems that get "mounted".  The unique
   ;; file system identifiers there ("UUIDs") can be obtained
