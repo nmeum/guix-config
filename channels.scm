@@ -3,7 +3,7 @@
         (url "https://gitlab.com/nonguix/nonguix")
         (branch "master")
         (commit
-          "841777ffcac40ad0a5a9e0451c05079a9cbcf139")
+          "60ffd0353e70d5e371c4bfe2201c9d08c1c05e18")
         (introduction
           (make-channel-introduction
             "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
@@ -14,7 +14,7 @@
         (url "https://github.com/nmeum/guix-channel.git")
         (branch "master")
         (commit
-          "cafca03b0cbd55f43d87a319300e521dbe153a15")
+          "9ee7e435bda9d72e4221e79e0ccd7ae10a1ed22c")
         (introduction
           (make-channel-introduction
             "808a00792c114c5c1662e8b1a51b90a2d23f313a"
@@ -22,10 +22,10 @@
               "514E 833A 8861 1207 4F98  F68A E447 3B6A 9C05 755D"))))
       (channel
         (name 'guix)
-        (url "https://git.guix.gnu.org/guix.git")
+        (url "https://codeberg.org/guix/guix.git")
         (branch "master")
         (commit
-          "2f274c57f203b9e5dc7fa3174a6a17c5916cb3ae")
+          "07f54635ae7fe5bd059b7f6188854a21c0f8dbdd")
         (introduction
           (make-channel-introduction
             "9edb3f66fd807b096b48283debdcddccfea34bad"

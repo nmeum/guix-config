@@ -15,7 +15,7 @@
 
              (nmeum packages misc)
              (nmeum packages desktop)
-             ((nongnu packages linux) #:select (linux-6.14 linux-firmware)))
+             ((nongnu packages linux) #:select (linux linux-firmware)))
 
 ;; The signing key for the nonguix substitutes embedded as plain text.
 ;;
@@ -44,8 +44,7 @@
               %default-authorized-guix-keys))))
 
 (operating-system
-  ;; XXX: linux-6.15 is missing substitues atm <https://cuirass.nonguix.org/search?query=linux>
-  (kernel linux-6.14)
+  (kernel linux)
   (firmware (list linux-firmware))
 
   (locale "en_US.utf8")
