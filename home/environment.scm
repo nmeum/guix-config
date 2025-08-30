@@ -140,9 +140,8 @@
                         #~(make-forkexec-constructor
                             (list (string-append #$bash-minimal "/bin/sh") "-c"
                                   (format #f
-                                    "(while ~a 5; do ~a; done) | ~a ~a"
-                                    (string-append #$chimera-utils "/bin/sleep")
-                                    (string-append #$chimera-utils "/bin/date")
+                                    "~a | ~a ~a"
+                                    (string-append #$ustatus "/bin/ustatus")
                                     (string-append #$dam "/bin/dam")
                                     (string-join
                                       '("-f Terminus:size=12"
