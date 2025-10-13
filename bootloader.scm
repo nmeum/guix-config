@@ -9,8 +9,8 @@
 (define (grub-copy installer)
   #~(lambda (bootloader device mount-point)
       ;; TODO: Make /boot/gnu/store a GC root and ensure it is garbage-collected.
-      (use-modules (srfi srfi-1)
-                   (guix import utils)
+      (use-modules ((srfi srfi-1) #:select (fold delete-duplicates))
+                   ((guix import utils) #:select (read-lines))
                    (ice-9 regex))
 
       ;; regex for finding a path to the Store in the Grub configuration file.
