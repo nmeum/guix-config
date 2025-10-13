@@ -25,15 +25,15 @@
         (fold
           (lambda (line acc)
             (let ((paths (map
-               match:substring
-               (list-matches store-regexp line))))
-        (if (null? paths)
-          acc
-          (append
-            (if (regexp-exec linux-regexp line) ; ignore paths in kernel cmline
-              (list (car paths))
-              paths)
-            acc)))) '() lines))
+                           match:substring
+                           (list-matches store-regexp line))))
+              (if (null? paths)
+                acc
+                (append
+                  (if (regexp-exec linux-regexp line) ; ignore paths in kernel cmline
+                    (list (car paths))
+                    paths)
+                  acc)))) '() lines))
 
       (let* ((install-dir (string-append mount-point "/boot"))
              (grub-cfg (string-append install-dir "/grub/grub.cfg"))
