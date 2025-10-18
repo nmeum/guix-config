@@ -6,11 +6,14 @@
 
 ;; wraps an existing Grub 'bootloader-installer' in a procedure which copies
 ;; all files referenced in Grub's configuration file to the install directory.
+;;
+;; TODO: make use of the new in-vicinity procedure (unreleased in GNU Guile).
+;; See https://cgit.git.savannah.gnu.org/cgit/guile.git/commit/?id=755f703dcb3110e1920e42078edc6d9c88cc8b28
 (define (grub-copy installer)
   #~(lambda (bootloader device mount-point)
       (use-modules ((srfi srfi-1) #:select (fold lset-adjoin lset-difference))
                    ((guix import utils) #:select (read-lines))
-                   ((ice-9 ftw) #:select (scandir))
+                   ((guix store) #:select (direct-store-path))
                    (ice-9 regex))
 
       ;; regex for finding a path to the Store in the Grub configuration file.
@@ -21,12 +24,15 @@
       ;; See https://www.gnu.org/software/grub/manual/grub/grub.html#linux
       (define linux-regexp (make-regexp "^[[:space:]]*linux[[:space:]]"))
 
-      ;; expand a list of paths, which potentially includes directories to
-      ;; a pure list of files (without including any paths to directories).
-      (define (expand-paths paths)
+      ;; Takes a list of /gnu/store paths and returns a list of unique directory
+      ;; entries in the /gnu/store directory (usually: hash + package + version).
+      (define (store-entries paths)
         (fold
           (lambda (path acc)
-            (append acc (find-files path)))
+            (lset-adjoin
+              equal?
+              acc
+              (substring (direct-store-path path) (string-length "/gnu/store"))))
           '() paths))
 
       (define (required-paths lines)
@@ -35,7 +41,7 @@
             (let ((paths (map match:substring (list-matches store-regexp line))))
               (if (null? paths)
                 acc
-                (if (regexp-exec linux-regexp line) ; ignore paths in kernel cmline
+                (if (regexp-exec linux-regexp line) ; ignore kernel cmdline paths
                   (lset-adjoin equal? acc (car paths))
                   (apply lset-adjoin (cons* equal? acc paths))))))
           '() lines))
@@ -43,8 +49,7 @@
       (define (existing-paths store)
         (map
           (lambda (path)
-            ;; remove the /boot prefix from every file path.
-            (string-copy path (string-length "/boot")))
+            (substring path (string-length "/boot")))
           (find-files store)))
 
       (let* ((install-dir (canonicalize-path (string-append mount-point "/boot")))
@@ -52,8 +57,12 @@
              (grub-lines (call-with-input-file grub-cfg read-lines))
              (required (required-paths grub-lines))
              (existing (existing-paths (string-append install-dir "/gnu/store"))))
-        (format #t "removing: ~a ~%" (lset-difference equal? existing (expand-paths required)))
-        (for-each
+        (for-each ; remove leftovers from old generations
+          (lambda (store-entry)
+            (delete-file-recursively
+              (string-append install-dir "/gnu/store/" store-entry)))
+          (lset-difference equal? (store-entries existing) (store-entries required)))
+        (for-each ; copy required files
           (lambda (store-file)
             (let ((dest-file (string-append install-dir store-file)))
               (mkdir-p (dirname dest-file))
