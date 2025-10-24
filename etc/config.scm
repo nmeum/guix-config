@@ -13,7 +13,7 @@
 
              (gnu services dns)
 
-             ((nmeum bootloader grub) #:select (grub-copy))
+             (nmeum bootloader grub)
              (nmeum packages misc)
              (nmeum packages desktop)
              ((nongnu packages linux) #:select (linux linux-firmware)))
@@ -44,10 +44,16 @@
       (append (list (plain-file "non-guix.pub" nonguix-signkey))
               %default-authorized-guix-keys))))
 
+;; Custom Grub configuration which copies all needed files to /boot, allowing
+;; for it to remain unencrypted and doing the LUKS unlock via the initramfs.
 (define grub-efi-removable-bootloader-copy
-  (bootloader
-    (inherit grub-efi-removable-bootloader)
-    (installer (grub-copy (bootloader-installer grub-efi-removable-bootloader)))))
+  (let ((grub grub-efi-removable-bootloader))
+    (bootloader
+      (inherit grub)
+      (installer (grub-copy (bootloader-installer grub)))
+      (configuration-file-generator
+        (configuration-file-generator-without-crypto-devices
+          (bootloader-configuration-file-generator grub))))))
 
 (operating-system
   (kernel linux)
