@@ -14,7 +14,7 @@
         (url "https://github.com/nmeum/guix-channel.git")
         (branch "master")
         (commit
-          "25467d6ea04ac2d62233522a18a35cd6308f9d62")
+          "a3dea3cc12cc40eecc5b49c26f9d26ca8a760889")
         (introduction
           (make-channel-introduction
             "808a00792c114c5c1662e8b1a51b90a2d23f313a"

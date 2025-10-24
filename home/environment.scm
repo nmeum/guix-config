@@ -24,8 +24,9 @@
   '("adwaita-icon-theme"
     "alacritty"
     "bemenu"
-    "creek"
+    "dbus"
     "firefox"
+    "libxcursor" ; for XCURSOR_PATH
     "river"
     "waylock"
     "wl-clipboard"
@@ -62,6 +63,7 @@
     "clang"
     "gcc-toolchain"
     "git"
+    "git-shuffle"
     "make"
     "neovim"
     "python"
