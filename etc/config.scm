@@ -13,6 +13,7 @@
 
              (gnu services dns)
 
+             ((nmeum bootloader grub) #:select (grub-copy))
              (nmeum packages misc)
              (nmeum packages desktop)
              ((nongnu packages linux) #:select (linux linux-firmware)))
@@ -42,6 +43,11 @@
     (authorized-keys
       (append (list (plain-file "non-guix.pub" nonguix-signkey))
               %default-authorized-guix-keys))))
+
+(define grub-efi-removable-bootloader-copy
+  (bootloader
+    (inherit grub-efi-removable-bootloader)
+    (installer (grub-copy (bootloader-installer grub-efi-removable-bootloader)))))
 
 (operating-system
   (kernel linux)
@@ -158,18 +164,14 @@
                 ;; (instead of Alpine) the default entry.
                 ;;
                 ;; See the --removable and --no-nvram option of grub-install.
-                (bootloader grub-efi-removable-bootloader)
-                (targets (list "/boot/efi"))
-                (keyboard-layout keyboard-layout)
-                (extra-initrd "/key-file.cpio")))
+                (bootloader grub-efi-removable-bootloader-copy)
+                (targets (list "/boot"))
+                (keyboard-layout keyboard-layout)))
 
   (mapped-devices (list (mapped-device
-                          (source (uuid "d9bd4aa0-bd68-4fef-b6a5-0657bd69daef"))
-                          (target "cryptroot")
-                          (type luks-device-mapping)
-                          (arguments
-                            '(#:allow-discards? #t
-                              #:key-file "/key-file.bin")))))
+                          (source (uuid "7c636d9f-c393-4446-b708-c0bc58ecdd59"))
+                          (target "root")
+                          (type luks-device-mapping))))
 
   ;; The list of file systems that get "mounted".  The unique
   ;; file system identifiers there ("UUIDs") can be obtained
@@ -178,7 +180,7 @@
     (let ((btrfs-subvol (lambda (mnt flags opts)
                           (file-system
                             (mount-point mnt)
-                            (device "/dev/mapper/cryptroot")
+                            (device "/dev/mapper/root")
                             (type "btrfs")
                             (flags flags)
                             (options (alist->file-system-options
@@ -202,12 +204,26 @@
                              "ssd"
                              ("compress" . "lzo")
                              ("space_cache" . "v2")))
+             (btrfs-subvol "/home"
+                           '(no-atime no-suid no-dev)
+                           '())
+             (btrfs-subvol "/etc"
+                           '(no-atime no-suid no-dev no-exec)
+                           '())
+             (btrfs-subvol "/var"
+                           '(no-atime no-suid no-dev)
+                           '())
+             (btrfs-subvol "/var/log"
+                           '(no-atime no-suid no-dev no-exec)
+                           '())
              ;; TODO: Consider using a tmpfs for /var/tmp
              (btrfs-subvol "/var/tmp"
                            '(no-atime no-suid no-dev no-exec)
                            '())
 
              (file-system
-               (mount-point "/boot/efi")
-               (device (uuid "04FA-08B2" 'fat32))
-               (type "vfat")) %base-file-systems))))
+               (mount-point "/boot")
+               (device (uuid "CA96-426F" 'fat32))
+               (type "vfat"))
+
+             %base-file-systems))))
