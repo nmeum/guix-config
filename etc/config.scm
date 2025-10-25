@@ -78,6 +78,8 @@
                   ;; to audio/video devices.
                   (supplementary-groups '("wheel" "netdev")))
                 %base-user-accounts))
+  ;; Don't copy any skeleton files for newly created users.
+  (skeletons '())
 
   ;; Allow sudo use without password authentication.
   ;;
