@@ -1,5 +1,6 @@
 (use-modules (gnu)
              (gnu packages shells)
+             (gnu packages zig-xyz)
              (gnu services dbus)
              (gnu services desktop)
              (gnu services dns)
@@ -8,6 +9,7 @@
              (gnu services mcron)
              (gnu services ssh)
              (gnu services sysctl)
+             (gnu services xorg)
              (gnu system locale)
              (gnu system pam)
 
@@ -140,7 +142,14 @@
                                       "domain_name"
                                       "domain_search"))
                          (static '("domain_name_servers=127.0.0.1"))
-                         (no-hook '("hostname")))))
+                         (no-hook '("hostname"))))
+
+              (service screen-locker-service-type
+                       (screen-locker-configuration
+                         (name "waylock")
+                         (program (file-append waylock "/bin/waylock"))
+                         (using-pam? #t)
+                         (using-setuid? #f))))
 
             (modify-services %base-services
                              ;; Enable substitutes for nonguix.
