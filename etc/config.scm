@@ -195,6 +195,10 @@
                                        (cons (cons "subvol" mnt) opts)))
                             (dependencies mapped-devices)))))
       (cons* (file-system
+               (mount-point "/boot")
+               (device (uuid "CA96-426F" 'fat32))
+               (type "vfat"))
+             (file-system
                (check? #f)
                (mount-point "/tmp")
                (device "none")
@@ -215,10 +219,5 @@
              (btrfs-subvol "/var/log" '(no-atime no-suid no-dev no-exec))
              ;; TODO: Consider using a tmpfs for /var/tmp
              (btrfs-subvol "/var/tmp" '(no-atime no-suid no-dev no-exec))
-
-             (file-system
-               (mount-point "/boot")
-               (device (uuid "CA96-426F" 'fat32))
-               (type "vfat"))
 
              %base-file-systems))))
