@@ -183,7 +183,8 @@
   ;; file system identifiers there ("UUIDs") can be obtained
   ;; by running 'blkid' in a terminal.
   (file-systems
-    (let ((btrfs-subvol (lambda (mnt flags opts)
+    ;; XXX: Flags are generic and opts are filesystem-specific mount options.
+    (let ((btrfs-subvol (lambda* (mnt flags #:key (opts #f))
                           (file-system
                             (mount-point mnt)
                             (device "/dev/mapper/root")
@@ -198,34 +199,21 @@
                (device "none")
                (type "tmpfs"))
 
-             ;; TODO: Subvolumes for /home, /var, /var/log, /var/tmp, …
-             ;;
-             ;; Note: Btrfs does presently not support filesystem-specific
+             ;; XXX: Btrfs does presently not support filesystem-specific
              ;; mount options on subvolume-granularity, generic ones work.
              ;;
              ;; See https://btrfs.readthedocs.io/en/stable/btrfs-subvolume.html#mount-options
-             (btrfs-subvol "/"
-                           '(no-atime)
-                           '("rw"
-                             "ssd"
-                             ("compress" . "lzo")
-                             ("space_cache" . "v2")))
-             (btrfs-subvol "/home"
-                           '(no-atime no-suid no-dev)
-                           '())
-             (btrfs-subvol "/etc"
-                           '(no-atime no-suid no-dev no-exec)
-                           '())
-             (btrfs-subvol "/var"
-                           '(no-atime no-suid no-dev)
-                           '())
-             (btrfs-subvol "/var/log"
-                           '(no-atime no-suid no-dev no-exec)
-                           '())
+             (btrfs-subvol "/" '(no-atime)
+                           #:opts '("rw"
+                                    "ssd"
+                                    ("compress" . "lzo")
+                                    ("space_cache" . "v2")))
+             (btrfs-subvol "/home" '(no-atime no-suid no-dev))
+             (btrfs-subvol "/etc" '(no-atime no-suid no-dev no-exec))
+             (btrfs-subvol "/var" '(no-atime no-suid no-dev))
+             (btrfs-subvol "/var/log" '(no-atime no-suid no-dev no-exec))
              ;; TODO: Consider using a tmpfs for /var/tmp
-             (btrfs-subvol "/var/tmp"
-                           '(no-atime no-suid no-dev no-exec)
-                           '())
+             (btrfs-subvol "/var/tmp" '(no-atime no-suid no-dev no-exec))
 
              (file-system
                (mount-point "/boot")
