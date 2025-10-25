@@ -11,8 +11,6 @@
              (gnu system locale)
              (gnu system pam)
 
-             (gnu services dns)
-
              (nmeum bootloader grub)
              (nmeum packages misc)
              (nmeum packages desktop)
