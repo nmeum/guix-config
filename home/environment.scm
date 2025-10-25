@@ -67,19 +67,22 @@
     "python"
     "universal-ctags"))
 
-(define packages-tools
-  '("chimerautils"
-    "cryptsetup"
-    "file"
-    "fzf"
+(define packages-security
+  '("cryptsetup"
     "gnupg"
-    "htop"
     "pinentry-gtk2"
     "pwgen"
+    "tpm"))
+
+(define packages-tools
+  '("chimerautils"
+    "file"
+    "fzf"
+    "htop"
     "ripgrep"
+    "rlwrap"
     "strace"
     "tmux"
-    "tpm"
     "tree"))
 
 (define my-packages
@@ -90,6 +93,7 @@
     packages-networking
     packages-multimedia
     packages-programming
+    packages-security
     packages-tools))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
