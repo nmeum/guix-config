@@ -79,6 +79,7 @@
     "ripgrep"
     "strace"
     "tmux"
+    "tpm"
     "tree"))
 
 (define my-packages
