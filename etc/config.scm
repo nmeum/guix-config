@@ -175,7 +175,8 @@
   (mapped-devices (list (mapped-device
                           (source (uuid "7c636d9f-c393-4446-b708-c0bc58ecdd59"))
                           (target "root")
-                          (type luks-device-mapping))))
+                          (type luks-device-mapping)
+                          (arguments '(#:allow-discards? #t)))))
 
   ;; The list of file systems that get "mounted".  The unique
   ;; file system identifiers there ("UUIDs") can be obtained
