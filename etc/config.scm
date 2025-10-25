@@ -185,7 +185,7 @@
   ;; by running 'blkid' in a terminal.
   (file-systems
     ;; XXX: Flags are generic and opts are filesystem-specific mount options.
-    (let ((btrfs-subvol (lambda* (mnt flags #:key (opts #f))
+    (let ((btrfs-subvol (lambda* (mnt flags #:key (opts '()))
                           (file-system
                             (mount-point mnt)
                             (device "/dev/mapper/root")
