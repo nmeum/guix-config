@@ -20,6 +20,20 @@
   #:use-module (nmeum packages desktop)
   #:use-module (nmeum packages misc))
 
+;; TODO:
+;;  • archive-email
+;;  • archive-logs
+;;  • bemenu-emoji
+;;  • edward
+;;  • fractal + gnome-keyring
+;;  • khal
+;;  • neo-layout (currently arrow keys don't work in framebuffer)
+;;  • newer version of man-pages-posix
+;;  • signal-desktop
+;;  • tuba + gnome-keyring
+;;  • vdirsyncer / pimsync
+;;  • zk
+
 (define packages-desktop
   '("adwaita-icon-theme"
     "alacritty"
@@ -27,14 +41,20 @@
     "dbus"
     "firefox"
     "libxcursor" ; for XCURSOR_PATH
+    "mupdf" ; TODO: try zathura
     "river"
+    "screen-message"
     "waylock"
     "wl-clipboard"
     "wlr-randr"
     "wlsunset"))
 
-(define packages-documents
-  '("mandoc"))
+(define packages-email
+  '("isync"
+    "lynx" ; for viewing HTML mails
+    "mblaze"
+    "mblaze-ui"
+    "msmtp"))
 
 (define packages-font
   '("fontconfig"
@@ -46,22 +66,28 @@
 
 (define packages-networking
   '("bind:utils"
+    "curl"
     "iproute2"
     "mosh"
     "mtr"
+    "rsync"
+    "wget"
     "whois"))
 
 (define packages-multimedia
   '("ncmpc"
+    "ffmpeg"
+    "imv"
     "mpv"
+    "perl-image-exiftool"
     "pipewire"
+    "qrencode"
+    "snapcast"
     "wireplumber"
     "yt-dlp"))
 
 (define packages-programming
-  '("curl"
-    "clang"
-    "gcc-toolchain"
+  '("ed"
     "git"
     "git-shuffle"
     "make"
@@ -78,25 +104,40 @@
 
 (define packages-tools
   '("chimerautils"
+    "entr"
     "file"
     "fzf"
     "htop"
+    "less"
+    "mandoc"
     "ripgrep"
     "rlwrap"
     "strace"
     "tmux"
     "tree"))
 
+;; non-desktop packages that I don't need on every shell host.
+(define packages-tools-extra
+  '("discount"
+    "man-pages"
+    "man-pages-posix"
+    "nmap"
+    "poppler"
+    "restic"
+    "sshfs"
+    "unison"))
+
 (define my-packages
   (append
     packages-desktop
-    packages-documents
+    packages-email
     packages-font
     packages-networking
     packages-multimedia
     packages-programming
     packages-security
-    packages-tools))
+    packages-tools
+    packages-tools-extra))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
