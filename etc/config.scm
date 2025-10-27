@@ -78,7 +78,7 @@
                   ;; Note: Without elogind, it is neccessary to also be in both
                   ;; the audio and the video group as seatd doesn't mediated access
                   ;; to audio/video devices.
-                  (supplementary-groups '("wheel" "netdev")))
+                  (supplementary-groups '("kvm" "wheel" "netdev")))
                 %base-user-accounts))
   ;; Don't copy any skeleton files for newly created users.
   (skeletons '())
