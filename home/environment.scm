@@ -90,6 +90,8 @@
   '("ed"
     "git"
     "git-shuffle"
+    "guile"
+    "guile-readline"
     "make"
     "neovim"
     "python"
