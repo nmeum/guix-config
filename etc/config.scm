@@ -212,6 +212,13 @@
                (mount-point "/tmp")
                (device "none")
                (type "tmpfs"))
+             (file-system
+               (check? #f)
+               (mount-point "/proc")
+               (type "proc")
+               (device "none")
+               (flags '(remount no-atime))
+               (options "hidepid=invisible"))
 
              ;; XXX: Btrfs does presently not support filesystem-specific
              ;; mount options on subvolume-granularity, generic ones work.

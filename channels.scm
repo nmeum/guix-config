@@ -25,7 +25,7 @@
         (url "https://codeberg.org/guix/guix.git")
         (branch "master")
         (commit
-          "f1d240feb255a1832dde872b4d1a82abb9572f92")
+          "8ab49a4f582dba1665ac506fbdb05767415f5bd5")
         (introduction
           (make-channel-introduction
             "9edb3f66fd807b096b48283debdcddccfea34bad"
