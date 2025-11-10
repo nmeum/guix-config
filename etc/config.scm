@@ -217,7 +217,7 @@
                (mount-point "/proc")
                (type "proc")
                (device "none")
-               (flags '(remount no-atime))
+               (flags '(remount))
                (options "hidepid=invisible"))
 
              ;; XXX: Btrfs does presently not support filesystem-specific
