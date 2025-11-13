@@ -23,7 +23,6 @@
 ;; TODO:
 ;;  • archive-email
 ;;  • archive-logs
-;;  • bemenu-emoji
 ;;  • edward
 ;;  • fractal + gnome-keyring
 ;;  • khal
@@ -38,6 +37,7 @@
   '("adwaita-icon-theme"
     "alacritty"
     "bemenu"
+    "bemenu-emoji"
     "dbus"
     "firefox"
     "libxcursor" ; for XCURSOR_PATH
@@ -87,7 +87,8 @@
     "yt-dlp"))
 
 (define packages-programming
-  '("ed"
+  '("binutils"
+    "ed"
     "git"
     "git-shuffle"
     "guile"
