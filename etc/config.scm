@@ -66,7 +66,7 @@
 
   (timezone "Europe/Berlin")
   (keyboard-layout (keyboard-layout "de" "neo"))
-  (host-name "hassium")
+  (host-name "gassium")
 
   ;; The list of user accounts ('root' is implicit).
   (users (cons* (user-account
