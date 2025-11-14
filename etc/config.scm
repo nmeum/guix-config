@@ -73,7 +73,7 @@
                   (name "soeren")
                   (comment "Sören Tempel")
                   (group "users")
-                  (shell (file-append loksh-bracketed "/bin/ksh"))
+                  (shell (file-append loksh-8pit "/bin/ksh"))
                   (home-directory "/home/soeren")
                   ;; Note: Without elogind, it is neccessary to also be in both
                   ;; the audio and the video group as seatd doesn't mediated access
