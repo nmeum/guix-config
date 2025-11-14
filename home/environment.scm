@@ -89,6 +89,7 @@
 (define packages-programming
   '("binutils"
     "ed"
+    "gdb"
     "git"
     "git-shuffle"
     "guile"
