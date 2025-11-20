@@ -8,6 +8,9 @@
     (inherit
       (base-os
         "scandium"
+        (bootloader-configuration
+          (bootloader grub-bootloader)
+          (targets '("/dev/sda")))
         (file-system
           (device (uuid "acbca5c3-27e2-47b4-85ed-9779895986a5"))
           (mount-point "/boot")
@@ -16,10 +19,6 @@
           (device (uuid "6b9c10fa-ca12-4008-a0cd-b08ce3b4d223"))
           (mount-point "/")
           (type "btrfs"))))
-
-    (bootloader (bootloader-configuration
-                  (bootloader grub-bootloader)
-                  (targets '("/dev/sda"))))
 
     (initrd-modules (append (list "virtio_scsi")
                             %base-initrd-modules))

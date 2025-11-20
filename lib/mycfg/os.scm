@@ -9,7 +9,7 @@
 
   #:use-module ((nmeum packages desktop) #:select (font-terminus-patched)))
 
-(define-public (base-os hostname bootfs rootfs)
+(define-public (base-os hostname bootloader bootfs rootfs)
   (operating-system
     (locale "en_US.utf8")
     (locale-definitions
@@ -27,7 +27,7 @@
     (sudoers-file
       (plain-file "sudoers" "root ALL=(ALL) ALL\n%wheel ALL=(ALL) NOPASSWD: ALL\n"))
 
-    (bootloader #f)
+    (bootloader bootloader)
     (file-systems
       (cons* bootfs
              rootfs
