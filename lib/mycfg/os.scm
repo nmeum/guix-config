@@ -74,8 +74,8 @@
                              (list
                                (unbound-zone
                                  (name ".")
-                                 (forward-addr '("149.112.112.112#dns.quad9.net"
-                                                 "2620:fe::9#dns.quad9.net"))
+                                 (forward-addr '("2620:fe::9#dns.quad9.net"
+                                                 "149.112.112.112#dns.quad9.net"))
                                  (forward-tls-upstream #t))))))
 
                 (service openssh-service-type
