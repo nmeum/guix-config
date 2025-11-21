@@ -1,7 +1,6 @@
 (use-modules (gnu)
              (mycfg os)
-             (mycfg transformations)
-             (nmeum packages misc))
+             (mycfg transformations))
 
 (define %os
   (operating-system
@@ -23,13 +22,7 @@
     (initrd-modules (append (list "virtio_scsi")
                             %base-initrd-modules))
 
-    (users (cons* (user-account
-                    (name "soeren")
-                    (comment "Sören Tempel")
-                    (group "users")
-                    (shell (file-append loksh-8pit "/bin/ksh"))
-                    (home-directory "/home/soeren")
-                    (supplementary-groups '("wheel" "netdev")))
+    (users (cons* (base-account '("wheel"))
                   %base-user-accounts))))
 
 ((compose

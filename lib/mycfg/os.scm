@@ -7,6 +7,9 @@
   #:use-module (gnu services sysctl)
   #:use-module (gnu system locale)
 
+  #:use-module ((ice-9 optargs) #:select (define*-public))
+
+  #:use-module ((nmeum packages misc))
   #:use-module ((nmeum packages desktop) #:select (font-terminus-patched)))
 
 (define-public %mycfg-signing-key
@@ -15,6 +18,15 @@
  (ecc
   (curve Ed25519)
   (q #B8D57861D22D07E89797C731264B49F647F15C6009D2A65C4F08C8DA75EA4BB2#)))"))
+
+(define*-public (base-account #:optional (extra-groups '("wheel")))
+  (user-account
+    (name "soeren")
+    (comment "Sören Tempel")
+    (group "users")
+    (shell (file-append loksh-8pit "/bin/ksh"))
+    (home-directory "/home/soeren")
+    (supplementary-groups extra-groups)))
 
 (define-public (base-os hostname bootloader bootfs rootfs)
   (operating-system
