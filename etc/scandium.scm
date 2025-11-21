@@ -26,6 +26,7 @@
                   %base-user-accounts))))
 
 ((compose
+   (btrfs-subvolumes (uuid "77309400-49ea-4ff6-9da7-38e7887e843e"))
    (add-services
      (list (service static-networking-service-type
                     (list (static-networking
