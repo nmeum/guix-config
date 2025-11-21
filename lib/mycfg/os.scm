@@ -81,20 +81,22 @@
                              '("dns.quad9.net" "www.google.com")))))
 
               (modify-services %base-services
-                               ;; Set a custom console font.
-                               (console-font-service-type config =>
-                                                          (map (lambda (tty)
-                                                                 (cons tty
-                                                                       #~(string-append
-                                                                           #+font-terminus-patched
-                                                                           "/share/consolefonts/ter-v16n.psf.gz")))
-                                                               '("tty1" "tty2" "tty3" "tty4" "tty5" "tty6")))
+                ;; Set a custom console font.
+                (console-font-service-type
+                  config =>
+                  (map (lambda (tty)
+                         (cons tty
+                               #~(string-append
+                                   #+font-terminus-patched
+                                   "/share/consolefonts/ter-v16n.psf.gz")))
+                       '("tty1" "tty2" "tty3" "tty4" "tty5" "tty6")))
 
-                               ;; Enable additional sysctls.
-                               (sysctl-service-type config =>
-                                                    (sysctl-configuration
-                                                      (inherit config)
-                                                      (settings
-                                                        (append %default-sysctl-settings
-                                                                '(("kernel.dmesg_restrict" . "1")
-                                                                  ("kernel.kptr_restrict" . "1")))))))))))
+                ;; Enable additional sysctls.
+                (sysctl-service-type
+                  config =>
+                  (sysctl-configuration
+                    (inherit config)
+                    (settings
+                      (append %default-sysctl-settings
+                              '(("kernel.dmesg_restrict" . "1")
+                                ("kernel.kptr_restrict" . "1")))))))))))
