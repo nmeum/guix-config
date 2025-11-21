@@ -38,7 +38,7 @@
                                       (device "eth0")
                                       (destination "default")
                                       (gateway "fe80::1"))))
-                            (name-servers '("2620:fe::9")))))
+                            (name-servers '("127.0.0.1")))))
            (simple-service 'guix-mycfg guix-service-type
              (guix-extension
                (authorized-keys
