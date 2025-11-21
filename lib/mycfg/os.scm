@@ -68,6 +68,7 @@
 
                 (service openssh-service-type
                          (openssh-configuration
+                           (permit-root-login #t)
                            (allow-agent-forwarding? #f)
                            (password-authentication? #f)))
 
