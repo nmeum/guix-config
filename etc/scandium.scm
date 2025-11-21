@@ -12,11 +12,11 @@
           (bootloader grub-bootloader)
           (targets '("/dev/sda")))
         (file-system
-          (device (uuid "acbca5c3-27e2-47b4-85ed-9779895986a5"))
+          (device (uuid "89d401cf-5ea4-4550-a4b8-7b56edc1323e"))
           (mount-point "/boot")
           (type "ext4"))
         (file-system
-          (device (uuid "6b9c10fa-ca12-4008-a0cd-b08ce3b4d223"))
+          (device (uuid "77309400-49ea-4ff6-9da7-38e7887e843e"))
           (mount-point "/")
           (type "btrfs"))))
 
