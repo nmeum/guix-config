@@ -9,6 +9,13 @@
 
   #:use-module ((nmeum packages desktop) #:select (font-terminus-patched)))
 
+(define-public %mycfg-signing-key
+  (plain-file "mycfg.pub" "
+(public-key
+ (ecc
+  (curve Ed25519)
+  (q #B8D57861D22D07E89797C731264B49F647F15C6009D2A65C4F08C8DA75EA4BB2#)))"))
+
 (define-public (base-os hostname bootloader bootfs rootfs)
   (operating-system
     (locale "en_US.utf8")
