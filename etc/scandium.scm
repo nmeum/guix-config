@@ -1,6 +1,7 @@
 (use-modules (gnu)
-             (gnu services web)
              (gnu services certbot)
+             (gnu services mail)
+             (gnu services web)
 
              (mycfg os)
              (mycfg transformations))
@@ -53,12 +54,23 @@
            (service nginx-service-type
                     (nginx-configuration
                       (server-blocks
-                        (list (nginx-server-configuration
-                                (listen '("[::]:443 ssl"))
-                                (server-name '("scandium.8pit.net"))
-                                (root "/srv/http/scandium.8pit.net")
-                                (ssl-certificate "/etc/letsencrypt/live/scandium.8pit.net/fullchain.pem")
-                                (ssl-certificate-key "/etc/letsencrypt/live/scandium.8pit.net/privkey.pem"))))))
+                        (list
+                          (nginx-server-configuration
+                            (listen '("[::]:443 ssl"))
+                            (server-name '("scandium.8pit.net"))
+                            (root "/srv/http/scandium.8pit.net")
+                            (ssl-certificate "/etc/letsencrypt/live/scandium.8pit.net/fullchain.pem")
+                            (ssl-certificate-key "/etc/letsencrypt/live/scandium.8pit.net/privkey.pem"))
+                          (nginx-server-configuration
+                            (listen '("[::]:443 ssl"))
+                            (server-name '("cal.8pit.net"))
+                            (ssl-certificate "/etc/letsencrypt/live/cal.8pit.net/fullchain.pem")
+                            (ssl-certificate-key "/etc/letsencrypt/live/cal.8pit.net/privkey.pem")
+                            (locations
+                              (list
+                                (nginx-location-configuration
+                                  (uri "/")
+                                  (body '("proxy_pass http://127.0.0.1:8080;"))))))))))
 
            ;; TODO: deploy account key from Guix repo via guix-sops.
            (service certbot-service-type
@@ -69,5 +81,20 @@
                       (certificates
                         (list
                           (certificate-configuration
-                            (domains '("scandium.8pit.net"))))))))))
- %os)
+                            (domains '("cal.8pit.net" "scandium.8pit.net")))))))
+
+           (service radicale-service-type
+                    (radicale-configuration
+                      (web-interface? #t)
+                      (auth
+                        (radicale-auth-configuration
+                          (type 'htpasswd)
+                          (htpasswd-encryption 'bcrypt)
+                          ;; TODO: deploy users file from Guix
+                          (htpasswd-filename "/etc/radicale/users")
+                          (delay 3)))
+                      (server
+                        (radicale-server-configuration
+                          (hosts '("127.0.0.1:8080"))
+                          (ssl? #f))))))))
+   %os)
