@@ -1,5 +1,6 @@
 (use-modules (gnu)
              (gnu services web)
+             (gnu services certbot)
 
              (mycfg os)
              (mycfg transformations))
@@ -48,10 +49,25 @@
                              (authorized-keys
                                (list %mycfg-signing-key))))
 
+           ;; TODO: create /srv from a service startup script.
            (service nginx-service-type
                     (nginx-configuration
                       (server-blocks
                         (list (nginx-server-configuration
+                                (listen '("[::]:443 ssl"))
                                 (server-name '("scandium.8pit.net"))
-                                (root "/srv/http/scandium.8pit.net")))))))))
+                                (root "/srv/http/scandium.8pit.net")
+                                (ssl-certificate "/etc/letsencrypt/live/scandium.8pit.net/fullchain.pem")
+                                (ssl-certificate-key "/etc/letsencrypt/live/scandium.8pit.net/privkey.pem"))))))
+
+           ;; TODO: deploy account key from Guix repo via guix-sops.
+           (service certbot-service-type
+                    (certbot-configuration
+                      (email "postmaster@8pit.net")
+                      (rsa-key-size 4096)
+                      (webroot "/srv/acme")
+                      (certificates
+                        (list
+                          (certificate-configuration
+                            (domains '("scandium.8pit.net"))))))))))
  %os)
