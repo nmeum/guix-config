@@ -1,4 +1,6 @@
 (use-modules (gnu)
+             (gnu services web)
+
              (mycfg os)
              (mycfg transformations))
 
@@ -40,8 +42,16 @@
                                       (destination "default")
                                       (gateway "fe80::1"))))
                             (name-servers '("127.0.0.1")))))
+
            (simple-service 'guix-mycfg guix-service-type
-             (guix-extension
-               (authorized-keys
-                 (list %mycfg-signing-key)))))))
+                           (guix-extension
+                             (authorized-keys
+                               (list %mycfg-signing-key))))
+
+           (service nginx-service-type
+                    (nginx-configuration
+                      (server-blocks
+                        (list (nginx-server-configuration
+                                (server-name '("scandium.8pit.net"))
+                                (root "/srv/http/scandium.8pit.net")))))))))
  %os)
